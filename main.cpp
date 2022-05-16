@@ -1,6 +1,8 @@
-﻿#include <iostream>
+﻿#include "Game.h"
 
 int main()
 {
-    std::cout << "Hello World!\n";
+	Game Tetris;
+	Tetris.Run();
+	return 0;
 }
