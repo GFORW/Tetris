@@ -17,7 +17,8 @@ enum Direction
 	left,
 	rotate,
 	right,
-	down
+	down,
+	blank
 };
 
 class Figure
@@ -32,6 +33,5 @@ public:
 	int Rotate(int px, int py, int r);
 	COORD POS;
 	int rotation_counter = 0;
-private:
 	std::wstring tetromino[7];
 };

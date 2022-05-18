@@ -10,7 +10,7 @@
 class Engine
 {
 public:
-	Engine(int X = 50, int Y = 25);
+	Engine(int X = 50, int Y = 25, int tick_msc = 50);
 	virtual ~Engine();
 
 
@@ -21,13 +21,13 @@ public:
 	void SetChar(unsigned int x, unsigned int y, wchar_t c) ;
 	void Run();
 	wchar_t GetChar(unsigned int x, unsigned int y);
-	void ChangeSpeed(int sec);
+	void ChangeTickSpeed(int msec);
 
 
 	int ScreenX;
 	int ScreenY;
 
-	int GameSpeed;
+	int tick;
 	int play;
 	int FPS;
 

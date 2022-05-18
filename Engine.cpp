@@ -2,7 +2,7 @@
 #include "Engine.h"
 #include <conio.h>
 
-Engine::Engine(int X, int Y) : ScreenX(X), ScreenY(Y)
+Engine::Engine(int X, int Y, int tick_msc) : ScreenX(X), ScreenY(Y), tick(tick_msc)
 {
 	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	hConsoleIn = GetStdHandle(STD_INPUT_HANDLE);
@@ -92,7 +92,7 @@ void Engine::Render()
 
 void Engine::SetChar(unsigned int x, unsigned int y, wchar_t c)
 {
-	Screen.at(x).at(y) = c;
+ 	Screen.at(x).at(y) = c;
 }
 
 wchar_t Engine::GetChar(unsigned int x, unsigned int y)
@@ -119,12 +119,12 @@ void Engine::Run()
 		auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 		if (delta > 0)
 			FPS = ( 1.00f / delta)* 1000.0f;
-		Sleep(GameSpeed);
+		std::this_thread::sleep_for(std::chrono::milliseconds(tick));
 	}
 	std::cin.ignore();
 }
 
-void Engine::ChangeSpeed(int sec)
+void Engine::ChangeTickSpeed(int msec)
 {
-	GameSpeed = sec;
+	tick = msec;
 }

@@ -10,7 +10,7 @@
 #define MiddleY (unsigned int)((ScreenY-1)/2)
 
 #define ScorePanelEndX  (ScreenX-1)
-#define ScorePanelStartX  (ScorePanelEndX - 11)
+#define ScorePanelStartX  (ScorePanelEndX - 10)
 #define ScorePanelMiddleX (ScorePanelStartX + (ScorePanelEndX-ScorePanelStartX)/2)
 #define ScorePanelMiddleY (unsigned int)((ScreenY-1)/2)
 
@@ -26,30 +26,44 @@ class Game : public Engine
 public:
 	Game();
 	~Game();
+private:
 
 	virtual void KeyPressed(int btnCode);
 	virtual void Update();
 
 	bool Collision();
 
+	void drawFigure(Figure* figptr);
+	void clearFigure(Figure* figptr);
+
 	void drawMenu();
 	void drawTable();
 	void drawScore();
-	void drawFigure(Figure* figptr);
 	void drawFPS();
-	void clearFigure(Figure* figptr);
-	void lock();
+
+	void swap_pieces();
 	void move();
-	void GameOver();
+	void gameover();
+	void check_lines();
+	void delete_lines();
+	void force();
+	Direction dir;
+
+	int speed_count;
+	int MENU = 0;
+	int SCORE = 0;
+
+	int play_speed;
+
+	std::vector<int> vLines;
+	COORD old_coord;
+
+	bool GAME_OVER = FALSE;
+	bool bForce;
 
 	std::unique_ptr<Figure> ptrFigure;
 	std::unique_ptr<Figure> ptrPreview;
-	Direction dir;
 
-private:
-	int place = 0;
-	int MENU = 0;
-	bool GAME_OVER = FALSE;
-	int SCORE = 0;
 	COORD stPos{ (SHORT)MiddleBoardX, (SHORT)1 };
+	COORD prewPos{ (SHORT) (ScorePanelMiddleX - 1),(SHORT)2 };
 };
