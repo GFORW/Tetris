@@ -84,3 +84,12 @@ void Figure::RotateFigure()
 			body.push_back(tetromino[Type][Rotate(x, y, rotation_counter)]);
 		}
 }
+
+
+Figure & Figure::operator=(const Figure & fig)
+{
+	this->POS = fig.POS;
+	this->Type = fig.Type;
+	this->SetBlock();
+	return *this;
+}

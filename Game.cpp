@@ -3,17 +3,18 @@
 
 Game::Game() : CnsFramework(30,25,50) // 
 {
-	play = TRUE;
-	MENU = 33;
+	//MENU = 0;
 	//drawMenu();
 	drawTable();
 	dir = down;
 	play_speed = 10;
-	srand(time(0));
+	auto seed = std::chrono::system_clock::now();
+	srand(std::chrono::system_clock::to_time_t(seed));
 	speed_count = 0;
 	ptrFigure = std::make_unique<Figure>((fType)(rand() % 7), stPos);
 	ptrPreview= std::make_unique<Figure>((fType)(rand() % 7), prewPos);
 	drawFigure(ptrPreview.get());
+
 }
 
 Game::~Game()
@@ -181,16 +182,26 @@ void Game::check_lines()
 }
 void Game::swap_pieces()
 {
+	/*
 	ptrFigure->Type = ptrPreview->Type;
 	ptrFigure->SetBlock();
 	ptrFigure->POS = stPos;
 	//new figure
 	clearFigure(ptrPreview.get());
-	srand(time(0));
+	*/
+
+	*ptrFigure = *ptrPreview;
+	ptrFigure->POS = stPos;
+	clearFigure(ptrPreview.get());
+
+	auto seed = std::chrono::system_clock::now();
+	srand(std::chrono::system_clock::to_time_t(seed));
+
 	ptrPreview->Type = (fType)(rand() % 7);
 	ptrPreview->SetBlock();
 	ptrPreview->POS = prewPos;
 	drawFigure(ptrPreview.get());
+
 	dir = down;
 }
 

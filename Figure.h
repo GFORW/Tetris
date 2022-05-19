@@ -1,6 +1,7 @@
 #pragma once
 #include <windows.h>
 #include <iostream>
+
 enum fType
 {
 	I,
@@ -25,13 +26,21 @@ class Figure
 {
 public:
 	Figure(fType type, COORD pos);
+	Figure& operator=(const Figure& fig);
 	~Figure();
+
 	void RotateFigure();
 	void SetBlock();
+
 	std::wstring body;
-	fType Type;
-	int Rotate(int px, int py, int r);
-	COORD POS;
-	int rotation_counter = 0;
 	std::wstring tetromino[7];
+
+	fType Type;
+
+	COORD POS;
+
+	int Rotate(int px, int py, int r);
+
+	int rotation_counter = 0;
+
 };

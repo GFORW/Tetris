@@ -2,7 +2,6 @@
 #include <CnsFramework.h>
 #include "Figure.h"
 #include <random>
-#include <time.h>
 #include <conio.h>
 
 
