@@ -1,7 +1,7 @@
 #include "Game.h"
 
 
-Game::Game() : Engine(30,25,50) // 
+Game::Game() : CnsFramework(30,25,50) // 
 {
 	play = TRUE;
 	MENU = 33;

@@ -1,0 +1,3 @@
+[submodule "CnsFramework"]
+	path = CnsFramework
+	url = https://github.com/GFORW/CnsFramework.git

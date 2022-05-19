@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine.h"
+#include <CnsFramework.h>
 #include "Figure.h"
 #include <random>
 #include <time.h>
@@ -21,7 +21,7 @@
 #define space L' '
 #define block L'X'
 
-class Game : public Engine
+class Game : public CnsFramework
 {
 public:
 	Game();
