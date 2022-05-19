@@ -1,7 +1,7 @@
 #include "Game.h"
 
 
-Game::Game() : Engine(27,15,50) // 
+Game::Game() : Engine(30,25,50) // 
 {
 	play = TRUE;
 	MENU = 33;
@@ -44,16 +44,16 @@ void Game::KeyPressed(int btnCode)
 void Game::Update()
 {
 	drawFPS();
+	speed_count++;
+	bForce = (speed_count == play_speed); // force piece down 
+	clearFigure(ptrFigure.get());
+	move();
 	if (GAME_OVER)
 	{
 		gameover();
 		drawScore();
 		return;
 	}
-	speed_count++;
-	bForce = (speed_count == play_speed); // force piece down 
-	clearFigure(ptrFigure.get());
-	move();
 	if (!vLines.empty())
 		delete_lines();
 	drawFigure(ptrFigure.get());
@@ -78,9 +78,16 @@ void Game::drawFigure(Figure* figptr)
 		}
 }
 
-void Game::move()  
+void Game::move()
 {
 	old_coord = ptrFigure->POS;
+
+	if (bForce)
+	{
+		force();
+		return;
+	}
+
 	switch (dir)
 	{
 	case left:
@@ -97,7 +104,7 @@ void Game::move()
 	}
 	if (Collision())
 		ptrFigure->POS = old_coord;
-		
+
 
 	if (dir == rotate)
 	{
@@ -109,9 +116,6 @@ void Game::move()
 			ptrFigure->RotateFigure();
 
 	}
-
-	if (bForce)
-		force();
 
 	dir = blank;
 
@@ -136,6 +140,7 @@ void Game::force()
 		if (Collision())
 			GAME_OVER = true;
 	}
+	dir = blank;
 }
 
 void Game::delete_lines()
@@ -252,7 +257,7 @@ void Game::drawScore()
 
 void Game::drawFPS()
 {
-	std::string title = "Tetris      FPS : ";
+	std::string title = "Tetris FPS: ";
 	title += std::to_string(FPS);
 	SetConsoleTitleA(title.c_str());
 }
