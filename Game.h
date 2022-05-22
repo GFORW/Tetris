@@ -27,38 +27,46 @@ public:
 	~Game();
 private:
 
-	virtual void KeyPressed(int btnCode);
-	virtual void Update();
-
-	bool Collision();
+	void  KeyPressed  (int btnCode) override;
+	void  Update (GameState * State) override;
 
 	void drawFigure(Figure* figptr);
 	void clearFigure(Figure* figptr);
-
+	void drawScore(GameState * State);
+	
 	void drawMenu();
 	void drawTable();
-	void drawScore();
 	void drawFPS();
+	bool Handle_Events();
 
 	void swap_pieces();
 	void move();
-	void gameover();
+	void GameOver();
+	void force();
+
 	void check_lines();
 	void delete_lines();
-	void force();
+
+	bool Collision();
+
 	Direction dir;
 
 	int speed_count;
-	int MENU = 0;
 	int SCORE = 0;
 
 	int play_speed;
 
+	GameState game;
+	GameState menu;
+	GameState game_over;
+	GameState win;
+
 	std::vector<int> vLines;
 	COORD old_coord;
 
-	bool GAME_OVER = FALSE;
+	bool GAME_OVER = false;
 	bool bForce;
+	bool MENU = false;
 
 	std::unique_ptr<Figure> ptrFigure;
 	std::unique_ptr<Figure> ptrPreview;

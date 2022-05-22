@@ -1,18 +1,26 @@
 #include "Game.h"
 
 
-Game::Game() : CnsFramework(30,25,50) // 
+Game::Game() : CnsFramework(30,25,50ms) // 
 {
-	//MENU = 0;
-	//drawMenu();
+	game = GameState(ScreenX, ScreenY);
+	game.name = "game";
+	menu = GameState(ScreenX, ScreenY);
+	menu.name = "menu";
+	game_over = GameState(ScreenX, ScreenY);
+	game_over.name = "game_over";
+	win = GameState(ScreenX, ScreenY);
+	win.name = "win";
+	current_state = &menu;
 	drawTable();
+	drawMenu();
 	dir = down;
 	play_speed = 10;
 	auto seed = std::chrono::system_clock::now();
 	srand(std::chrono::system_clock::to_time_t(seed));
 	speed_count = 0;
 	ptrFigure = std::make_unique<Figure>((fType)(rand() % 7), stPos);
-	ptrPreview= std::make_unique<Figure>((fType)(rand() % 7), prewPos);
+	ptrPreview = std::make_unique<Figure>((fType)(rand() % 7), prewPos);
 	drawFigure(ptrPreview.get());
 
 }
@@ -42,31 +50,56 @@ void Game::KeyPressed(int btnCode)
 
 }
 
-void Game::Update()
+bool Game::Handle_Events()
 {
-	drawFPS();
-	speed_count++;
-	bForce = (speed_count == play_speed); // force piece down 
-	clearFigure(ptrFigure.get());
-	move();
-	if (GAME_OVER)
+	if (current_state->name == "game_over")
 	{
-		gameover();
-		drawScore();
-		return;
+		if (GAME_OVER)
+		{
+			GAME_OVER = false;
+			return true; // do another loop for render
+		}
+		std::cin.ignore();
+		return false;
 	}
-	if (!vLines.empty())
-		delete_lines();
-	drawFigure(ptrFigure.get());
+	return true;
 }
 
+void Game::Update(GameState * State)
+{
+	drawFPS();
+	if (State->name == "menu")
+	{
+		if (MENU)
+		{
+			MENU ^= MENU;
+			return;
+		}
+		std::cin.ignore();
+		MENU++;
+		current_state = &game;
+	}
+	if (State->name == "game")
+	{
+		drawFPS();
+		speed_count++;
+		bForce = (speed_count == play_speed); // force piece down 
+		clearFigure(ptrFigure.get());
+		move();
+		if (!vLines.empty())
+			delete_lines();
+		drawFigure(ptrFigure.get());
+	}
+	if (State->name == "game_over")
+		GameOver();
+}
 
 void Game::clearFigure(Figure* figptr)
 {
 	for (int px = 0; px < 4; px++)
 		for (int py = 0; py < 4; py++)
 			if (figptr->tetromino[figptr->Type][figptr->Rotate(px, py, figptr->rotation_counter)] == block)
-				SetChar(figptr->POS.X + px, figptr->POS.Y + py, space);
+				game.SetChar(figptr->POS.X + px, figptr->POS.Y + py, space);
 }
 
 void Game::drawFigure(Figure* figptr)
@@ -75,7 +108,7 @@ void Game::drawFigure(Figure* figptr)
 		for (int py = 0; py < 4; py++)
 		{
 			if (figptr->tetromino[figptr->Type][figptr->Rotate(px, py, figptr->rotation_counter)] == block)
-				SetChar(figptr->POS.X + px, figptr->POS.Y + py, block);
+				game.SetChar(figptr->POS.X + px, figptr->POS.Y + py, block);
 		}
 }
 
@@ -136,10 +169,11 @@ void Game::force()
 		check_lines();
 		swap_pieces();
 
-
-
 		if (Collision())
+		{
 			GAME_OVER = true;
+			current_state = &game_over;
+		}
 	}
 	dir = blank;
 }
@@ -151,13 +185,13 @@ void Game::delete_lines()
 		{
 			for (int py = v; py > 1; py--)
 			{
-				SetChar(px, py, GetChar(px, py-1));
+				game.SetChar(px, py, game.GetChar(px, py-1));
 			}
 		}
 	SCORE += ScorePanelMiddleX - 1;
 	if(play_speed > 1)
 		play_speed -= 1;
-	drawScore();
+	drawScore(&game);
 
 	vLines.clear();
 }
@@ -169,27 +203,20 @@ void Game::check_lines()
 		{
 			bool bLine = true;
 			for (int px = 1;  px < ScorePanelStartX; px++)
-				bLine &= (GetChar((px), (ptrFigure->POS.Y + py)) != space);
+				bLine &= (game.GetChar((px), (ptrFigure->POS.Y + py)) != space);
 
 			if (bLine)
 			{
 				// Remove Line, set to = ''
 				for (int px = 1; px < ScorePanelStartX; px++)
-					SetChar( px, (ptrFigure->POS.Y + py), space);
+					game.SetChar( px, (ptrFigure->POS.Y + py), space);
 				vLines.push_back(ptrFigure->POS.Y + py);
 			}
 		}
 }
+
 void Game::swap_pieces()
 {
-	/*
-	ptrFigure->Type = ptrPreview->Type;
-	ptrFigure->SetBlock();
-	ptrFigure->POS = stPos;
-	//new figure
-	clearFigure(ptrPreview.get());
-	*/
-
 	*ptrFigure = *ptrPreview;
 	ptrFigure->POS = stPos;
 	clearFigure(ptrPreview.get());
@@ -217,7 +244,7 @@ bool Game::Collision()
 			{
 				if ((ptrFigure->POS.X + px >= 0 && ptrFigure->POS.X + px <= ScorePanelStartX) && (ptrFigure->POS.Y + py >= 0 && ptrFigure->POS.Y + py <= ScreenY))
 				{
-					if (GetChar((ptrFigure->POS.X + px), (ptrFigure->POS.Y + py)) != space)
+					if (game.GetChar((ptrFigure->POS.X + px), (ptrFigure->POS.Y + py)) != space)
 						return true;
 				}
 			}
@@ -225,14 +252,20 @@ bool Game::Collision()
 	return false;
 }
 
-void Game::gameover()
+void Game::GameOver()
 {
-	play = FALSE;
 	std::string gm_ov = "GAME OVER";
 	for (unsigned int i = 0, x = MiddleBoardX - gm_ov.size() / 2; i < gm_ov.size(); x++, i++)
 	{
-		SetChar(x, MiddleBoardY, gm_ov.at(i));
+		game_over.SetChar(x, MiddleBoardY, gm_ov.at(i));
 	}
+
+	std::string score = "SCORE";
+	for (size_t i = 0, x = ScorePanelMiddleX - score.size() / 2; i < score.size(); x++, i++)
+	{
+		game_over.SetChar(x, ScorePanelMiddleY, score.at(i));
+	}
+	drawScore(&game_over);
 };
 
 void Game::drawTable()
@@ -244,25 +277,25 @@ void Game::drawTable()
 		for (int x = 0; x < ScreenX; x++)
 		{
 			if ((y == 0) || (x == 0) || x == ScreenX - 1 || y == ScreenY - 1)
-				SetChar(x, y, bounds);
+				game.SetChar(x, y, bounds);
 			if (x == ScorePanelStartX)
-				SetChar(x, y, bounds);
+				game.SetChar(x, y, bounds);
 		}
 	}
 	std::string score = "SCORE";
 	for (size_t i = 0, x = ScorePanelMiddleX - score.size() / 2; i < score.size(); x++, i++)
 	{
-		SetChar(x, ScorePanelMiddleY, score.at(i));
+		game.SetChar(x, ScorePanelMiddleY, score.at(i));
 	}
-	drawScore();
+	drawScore(&game);
 }
 
-void Game::drawScore()
+void Game::drawScore(GameState * state)
 {
 	std::wstring scr = std::to_wstring(SCORE);
 	for (unsigned int i = 0, x = ScorePanelMiddleX; i < scr.size(); x++, i++)
 	{
-		SetChar(x, ScorePanelMiddleY + 1, scr[i]);
+		state->SetChar(x, ScorePanelMiddleY + 1, scr[i]);
 	}
 }
 
@@ -275,32 +308,39 @@ void Game::drawFPS()
 
 void Game::drawMenu()
 {
+
 	std::string text = "TETRIS GAME";
 	std::string text1 = " - INFINITE GAME";
 	std::string text2 = " - DO NOT FILL THE SCREEN WITH PARTS";
 	std::string text3 = " - EACH FULL ROW WILL GET DELETED";
 	std::string text4 = "PRESS ANY BUTTON TO START";
 
+	if (ScreenX < text4.size() * 2)
+	{
+		current_state = &game;
+		return;
+	}
+
 	for (size_t i = 0, x = MiddleX - text.size() /2 ; i < text.size(); x++, i++)
 	{
-		SetChar(x, MiddleY -5, text.at(i));
+		menu.SetChar(x, MiddleY -5, text.at(i));
 	}
 	for (size_t i = 0, x = MiddleX - (text2.size() / 2) ; i < text1.size(); x++, i++)
 	{
-		SetChar(x, MiddleY , text1.at(i));
+		menu.SetChar(x, MiddleY , text1.at(i));
 	}
 	for (size_t i = 0, x = MiddleX - (text2.size() / 2);  i < text2.size(); x++, i++)
 	{
-		SetChar(x, MiddleY + 1, text2.at(i));
+		menu.SetChar(x, MiddleY + 1, text2.at(i));
 	}
 	for (size_t i = 0, x = MiddleX - (text2.size()/2) ; i < text3.size(); x++, i++)
 	{
-		SetChar(x, MiddleY + 2, text3.at(i));
+		menu.SetChar(x, MiddleY + 2, text3.at(i));
 	}
 
 	for (size_t i = 0, x = MiddleX - text4.size() / 2; i < text4.size(); x++, i++)
 	{
-		SetChar(x, ScreenY -2, text4.at(i));
+		menu.SetChar(x, ScreenY -2, text4.at(i));
 	}
-	MENU++;
+	MENU = true;
 }
