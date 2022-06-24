@@ -1,15 +1,10 @@
 #include "Figure.h"
 
-Figure::Figure(fType type, COORD pos) : Type(type), POS(pos)
+
+Figure::Figure(const fType& type, const COORD& pos) : Type(type), POS(pos), OLD_POS(pos)
 {
-	tetromino[0].append(L"..X...X...X...X.");
-	tetromino[1].append(L"..X..XX...X.....");
-	tetromino[2].append(L".....XX..XX.....");
-	tetromino[3].append(L"..X..XX..X......");
-	tetromino[4].append(L".X...XX...X.....");
-	tetromino[5].append(L".X...X...XX.....");
-	tetromino[6].append(L"..X...X..XX.....");
 	SetBlock();
+	dir = down;
 }
 
 Figure::~Figure()
@@ -48,7 +43,7 @@ void Figure::SetBlock()
 	}
 }
 
-int Figure::Rotate(int px, int py, int r)
+int Figure::Rotate(const int& px, const int& py, const int& r) const
 {
 	int pi = 0;
 	switch (r % 4)
@@ -62,6 +57,7 @@ int Figure::Rotate(int px, int py, int r)
 		pi = 12 + py - (px * 4);	//13  9  5  1
 		break;						//14 10  6  2
 									//15 11  7  3
+
 	case 2: // 180 degrees			//15 14 13 12     
 		pi = 15 - (py * 4) - px;	//11 10  9  8
 		break;						// 7  6  5  4
@@ -75,21 +71,24 @@ int Figure::Rotate(int px, int py, int r)
 	return pi;
 }
 
-void Figure::RotateFigure()
+void Figure::RotateFigure() 
 {
 	body.erase();
+	int pi{};
 	for (int x = 0; x < 4; x++)
 		for (int y = 0; y < 4; y++)
 		{
-			body.push_back(tetromino[Type][Rotate(x, y, rotation_counter)]);
+			pi = tetromino[Type][Rotate(x, y, rotation_counter)];
+			body.push_back(pi);
 		}
 }
 
-
-Figure & Figure::operator=(const Figure & fig)
+Figure & Figure::operator=(const Figure& const fig)
 {
-	this->POS = fig.POS;
-	this->Type = fig.Type;
-	this->SetBlock();
+	if (&fig == this) return *this;
+	POS = fig.POS;
+	Type = fig.Type;
+	SetBlock();
 	return *this;
 }
+

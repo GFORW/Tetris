@@ -1,3 +1,3 @@
 ## Tetris Game for Console
 
-![](Tetris.gif)
+![](./resources/Tetris.gif)
