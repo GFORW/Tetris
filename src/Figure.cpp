@@ -4,7 +4,6 @@
 Figure::Figure(const fType& type, const COORD& pos) : Type(type), POS(pos), OLD_POS(pos)
 {
 	SetBlock();
-	dir = down;
 }
 
 Figure::~Figure()
@@ -43,7 +42,28 @@ void Figure::SetBlock()
 	}
 }
 
-int Figure::Rotate(const int& px, const int& py, const int& r) const
+void Figure::RotateFigure() 
+{
+	body.erase();
+	int pi{};
+	for (int x = 0; x < 4; x++)
+		for (int y = 0; y < 4; y++)
+		{
+			pi = body[Rotate(x, y, rotation_counter)];
+			body.push_back(pi);
+		}
+}
+
+Figure& Figure::operator=(const Figure& const fig)
+{
+	if (&fig == this) return *this;
+	POS = fig.POS;
+	Type = fig.Type;
+	SetBlock();
+	return *this;
+}
+
+int Rotate(const int& px, const int& py, const int& r)
 {
 	int pi = 0;
 	switch (r % 4)
@@ -70,25 +90,3 @@ int Figure::Rotate(const int& px, const int& py, const int& r) const
 
 	return pi;
 }
-
-void Figure::RotateFigure() 
-{
-	body.erase();
-	int pi{};
-	for (int x = 0; x < 4; x++)
-		for (int y = 0; y < 4; y++)
-		{
-			pi = tetromino[Type][Rotate(x, y, rotation_counter)];
-			body.push_back(pi);
-		}
-}
-
-Figure & Figure::operator=(const Figure& const fig)
-{
-	if (&fig == this) return *this;
-	POS = fig.POS;
-	Type = fig.Type;
-	SetBlock();
-	return *this;
-}
-
